@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-hant">
+
+    <head>
+
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <meta name="theme-color" content="#ffffff">
+        <meta name="robots" content="index, follow">
+
+        <!-- SEO 標題與描述 -->
+        <title>智能時鐘 - 語音控制與計時功能 - 邱敬幃 Pardn Chiu</title>
+        <meta name="title" content="智能時鐘 - 語音控制與計時功能 - 邱敬幃">
+        <meta name="description" content="智能時鐘，支援語音控制功能，可顯示當前時間、秒數，並進行計時管理，是一款創新的語音交互應用。">
+        <meta name="keywords" content="智能時鐘, 語音控制, 時間顯示, 秒數顯示, 計時功能, 創新應用, 語音識別">
+        <meta name="author" content="邱敬幃 Pardn Chiu">
+        <link rel="author" href="https://pardn.io/">
+        <link rel="canonical" href="https://pardn.io/">
+
+        <!-- Favicon -->
+        <link rel="icon" href="./static/image/logo.png" type="image/x-icon">
+
+        <!-- Open Graph -->
+        <meta property="og:title" content="智能時鐘 - 語音控制與計時功能 - 邱敬幃">
+        <meta property="og:description" content="智能時鐘，支援語音控制功能，可顯示當前時間、秒數，並進行計時管理，是一款創新的語音交互應用。">
+        <meta property="og:image" content="./image/cover.jpg">
+        <meta property="og:url" content="https://pardn.io/">
+        <meta property="og:site_name" content="QuickUI">
+        <meta property="og:type" content="website">
+        <meta property="og:locale" content="zh_TW">
+
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta property="twitter:title" content="智能時鐘 - 語音控制與計時功能 - 邱敬幃">
+        <meta property="twitter:description" content="智能時鐘，支援語音控制功能，可顯示當前時間、秒數，並進行計時管理，是一款創新的語音交互應用。">
+        <meta property="twitter:image" content="./image/cover.jpg">
+        <meta property="twitter:url" content="https://pardn.io/">
+
+        <!-- Google Verification -->
+        <meta name="google-site-verification" content="YQQ2f6AchR8dcb55Az2BYd_mw4TrP0J1RApD-v2v65Y">
+
+        <!-- Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-L5VYEZPVXX"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', 'G-L5VYEZPVXX');
+        </script>
+
+        <!-- Preload and Preconnect -->
+        <!-- link -->
+        <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+        <link rel="preload" href="https://cdn.jsdelivr.net/npm/@pardnchiu/quickui@0.6.2/dist/QuickUI.js" as="script">
+        <script src="https://cdn.jsdelivr.net/npm/@pardnchiu/quickui@0.6.2/dist/QuickUI.js" copyright="Pardn Ltd"></script>
+
+        <!-- Local Resources -->
+        <link rel="stylesheet" href="./css/index.css">
+
+        <!-- JSON-LD Schema -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "智能時鐘",
+            "description": "智能時鐘，支援語音控制功能，可顯示當前時間、秒數，並進行計時管理，是一款創新的語音交互應用。",
+            "url": "https://pardnchiu.github.com/pardnchiu/web-smart-clock",
+            "creator": {
+                "@type": "Person",
+                "name": "邱敬幃 Pardn Chiu",
+                "url": "https://pardn.io/"
+            },
+        }
+        </script>
+    </head>
+
+    <body id="body">
+        <section id="timer" class="timer">
+            <div class="number" data-value="-">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="number" data-value="-">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="colon"></div>
+            <div class="number" data-value="-">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="number" data-value="-">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </section>
+    </body>
+    <script>
+        document.addEventListener("DOMContentLoaded", async _ => {
+            page = new QUI({
+                id: "body",
+                when: {
+                    rendered: _ => {
+                        if (!('webkitSpeechRecognition' in window)) {
+                            alert('此瀏覽器不支援語音識別功能');
+                        }
+                        else {
+                            const recognition = new webkitSpeechRecognition();
+
+                            recognition.lang = 'zh-TW';
+                            recognition.continuous = true;
+                            recognition.interimResults = true;
+
+                            let debounceTimer = null;
+
+                            recognition.onresult = (event) => {
+                                let transcript = '';
+                                for (let i = event.resultIndex; i < event.results.length; i++) {
+                                    transcript += event.results[i][0].transcript;
+                                }
+                                console.log('偵測到語音：', transcript);
+
+                                clearTimeout(debounceTimer);
+                                clearInterval(timer);
+                                time = null;
+
+                                debounceTimer = setTimeout(() => {
+                                    if (transcript.includes('現在時間') || transcript.includes('當前時間')) {
+                                        setTime();
+                                        timer = setInterval(() => {
+                                            setTime();
+                                        }, 1000);
+                                    }
+                                    else if (transcript.includes('現在秒數') || transcript.includes('當前秒數')) {
+                                        setSec();
+                                        timer = setInterval(() => {
+                                            setSec();
+                                        }, 1000);
+                                    }
+                                    else if (transcript.includes('計時') && transcript.includes('分鐘')) {
+                                        const regex = transcript.match(/計時(\d+)分鐘/);
+                                        const sec = parseInt(regex[1] || 0);
+                                        time = sec * 60;
+
+                                        setCountDown();
+                                        timer = setInterval(() => {
+                                            setCountDown();
+                                        }, 1000);
+                                    }
+                                    else if (transcript.includes('計時') && transcript.includes('秒')) {
+                                        const regex = transcript.match(/計時(\d+)秒/);
+                                        const sec = parseInt(regex[1] || 0);
+                                        time = sec;
+
+                                        setCountDown();
+                                        timer = setInterval(() => {
+                                            setCountDown();
+                                        }, 1000);
+                                    }
+                                    else if (transcript.includes('停止')) {
+                                        setStop();
+                                    }
+                                    else {
+                                        setFace();
+                                    }
+                                }, 1000);
+                            };
+
+                            recognition.onerror = (event) => {
+                                console.error('語音識別錯誤：', event.error);
+                            };
+
+                            recognition.onend = () => {
+                                console.log('語音識別已停止');
+                            };
+
+                            recognition.start();
+                        }
+
+                    }
+                }
+            });
+
+            const dom = document.getElementById("timer");
+            const number_0 = dom.children[0];
+            const number_1 = dom.children[1];
+            const number_2 = dom.children[3];
+            const number_3 = dom.children[4];
+            const colon = dom.children[2];
+
+            let timer, time;
+
+            function getNow() {
+                const domTime = document.getElementById("time-time");
+                const date = new Date();
+
+                const offset = 8;
+                const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+                const localDate = new Date(utc + offset * 3600000);
+
+                const h = ("0" + localDate.getHours()).slice(-2);
+                const m = ("0" + localDate.getMinutes()).slice(-2);
+                const s = ("0" + localDate.getSeconds()).slice(-2);
+
+                return {
+                    h,
+                    m,
+                    s
+                }
+            }
+
+            function setTime() {
+                let now = getNow();
+
+                number_0.dataset.value = now.h[0];
+                number_1.dataset.value = now.h[1];
+                number_2.dataset.value = now.m[0];
+                number_3.dataset.value = now.m[1];
+                colon.dataset.value = ""
+            };
+
+            function setSec() {
+                let now = getNow();
+
+                number_0.dataset.value = now.m[0];
+                number_1.dataset.value = now.m[1];
+                number_2.dataset.value = now.s[0];
+                number_3.dataset.value = now.s[1];
+                colon.dataset.value = ""
+            };
+
+            function setStop() {
+                number_0.dataset.value = number_1.dataset.value = number_2.dataset.value = number_3.dataset.value = "-";
+            };
+
+            function setFace() {
+                number_0.dataset.value = number_3.dataset.value = "";
+                number_1.dataset.value = number_2.dataset.value = "eye"
+                colon.dataset.value = "mouth"
+            };
+
+            function setCountDown() {
+                if (time < 0) {
+                    clearInterval(timer);
+                    time = null
+                    console.log("Countdown finished!");
+                }
+                else if (time >= 60) {
+                    let m = ("0" + Math.floor(time / 60)).slice(-2);
+                    let s = ("0" + time % 60).slice(-2);
+
+                    number_0.dataset.value = m[0];
+                    number_1.dataset.value = m[1];
+                    number_2.dataset.value = s[0];
+                    number_3.dataset.value = s[1];
+
+                    time--;
+                }
+                else {
+                    let s = ("0" + time).slice(-2);
+
+                    number_0.dataset.value = number_1.dataset.value = "0";
+                    number_2.dataset.value = s[0];
+                    number_3.dataset.value = s[1];
+
+                    time--;
+                };
+            };
+        });
+    </script>
+
+</html>
