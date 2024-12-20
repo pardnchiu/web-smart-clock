@@ -136,31 +136,31 @@
                             let debounceTimer = null;
 
                             recognition.onresult = (event) => {
-                                let transcript = '';
+                                let text = '';
                                 for (let i = event.resultIndex; i < event.results.length; i++) {
-                                    transcript += event.results[i][0].transcript;
+                                    text += event.results[i][0].transcript;
                                 }
-                                console.log('偵測到語音：', transcript);
+                                console.log('偵測到語音：', text);
 
                                 clearTimeout(debounceTimer);
                                 clearInterval(timer);
                                 time = null;
 
                                 debounceTimer = setTimeout(() => {
-                                    if (transcript.includes('現在時間') || transcript.includes('當前時間')) {
+                                    if (text.includes('現在時間') || text.includes('當前時間')) {
                                         setTime();
                                         timer = setInterval(() => {
                                             setTime();
                                         }, 1000);
                                     }
-                                    else if (transcript.includes('現在秒數') || transcript.includes('當前秒數')) {
+                                    else if (text.includes('現在秒數') || text.includes('當前秒數')) {
                                         setSec();
                                         timer = setInterval(() => {
                                             setSec();
                                         }, 1000);
                                     }
-                                    else if (transcript.includes('計時') && transcript.includes('分鐘')) {
-                                        const regex = transcript.match(/計時(\d+)分鐘/);
+                                    else if (text.includes('計時') && text.includes('分鐘')) {
+                                        const regex = text.match(/計時(\d+)分鐘/);
                                         const sec = parseInt(regex[1] || 0);
                                         time = sec * 60;
 
@@ -169,8 +169,8 @@
                                             setCountDown();
                                         }, 1000);
                                     }
-                                    else if (transcript.includes('計時') && transcript.includes('秒')) {
-                                        const regex = transcript.match(/計時(\d+)秒/);
+                                    else if (text.includes('計時') && text.includes('秒')) {
+                                        const regex = text.match(/計時(\d+)秒/);
                                         const sec = parseInt(regex[1] || 0);
                                         time = sec;
 
@@ -179,7 +179,7 @@
                                             setCountDown();
                                         }, 1000);
                                     }
-                                    else if (transcript.includes('停止')) {
+                                    else if (text.includes('停止')) {
                                         setStop();
                                     }
                                     else {
@@ -189,11 +189,11 @@
                             };
 
                             recognition.onerror = (event) => {
-                                console.error('語音識別錯誤：', event.error);
+                                setFace();
                             };
 
                             recognition.onend = () => {
-                                console.log('語音識別已停止');
+                                setFace();
                             };
 
                             recognition.start();
