@@ -153,6 +153,12 @@
                                             setTime();
                                         }, 1000);
                                     }
+                                    else if (text.includes('現在日期') || text.includes('當前日期')) {
+                                        setDate();
+                                        timer = setInterval(() => {
+                                            setDate();
+                                        }, 1000);
+                                    }
                                     else if (text.includes('現在秒數') || text.includes('當前秒數')) {
                                         setSec();
                                         timer = setInterval(() => {
@@ -215,21 +221,30 @@
             function getNow() {
                 const domTime = document.getElementById("time-time");
                 const date = new Date();
-
-                const offset = 8;
-                const utc = date.getTime() + date.getTimezoneOffset() * 60000;
-                const localDate = new Date(utc + offset * 3600000);
-
-                const h = ("0" + localDate.getHours()).slice(-2);
-                const m = ("0" + localDate.getMinutes()).slice(-2);
-                const s = ("0" + localDate.getSeconds()).slice(-2);
+                const h = ("0" + date.getHours()).slice(-2);
+                const m = ("0" + date.getMinutes()).slice(-2);
+                const s = ("0" + date.getSeconds()).slice(-2);
+                const M = ("0" + (date.getMonth() + 1)).slice(-2);
+                const D = ("0" + date.getDate()).slice(-2);
 
                 return {
+                    M,
+                    D,
                     h,
                     m,
                     s
                 }
             }
+
+            function setDate() {
+                let now = getNow();
+
+                number_0.dataset.value = now.M[0];
+                number_1.dataset.value = now.M[1];
+                number_2.dataset.value = now.D[0];
+                number_3.dataset.value = now.D[1];
+                colon.dataset.value = "mouth"
+            };
 
             function setTime() {
                 let now = getNow();
